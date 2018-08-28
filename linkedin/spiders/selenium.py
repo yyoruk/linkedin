@@ -13,7 +13,7 @@ from linkedin.items import LinkedinUser
 """
 number of seconds used to wait the web page's loading.
 """
-WAIT_TIMEOUT = 10
+WAIT_TIMEOUT = 20
 
 LINKEDIN_LOGIN_URL = 'https://www.linkedin.com/'
 
@@ -132,7 +132,7 @@ def extracts_linkedin_users(driver, company):
     :return: Iterator on LinkedinUser.
     """
 
-    for i in range(1, 11):
+    for i in range(1, 12): 
         print(f'loading {i}th user')
 
         last_result_xpath = f'//li[{i}]/div/div[@class="search-result__wrapper"]'
@@ -140,19 +140,29 @@ def extracts_linkedin_users(driver, company):
         result = get_by_xpath_or_none(driver, last_result_xpath)
         if result is not None:
 
+            link_elem = get_by_xpath_or_none(result, './/a')
+            link = link_elem.get_attribute('href') if link_elem is not None else None
+
+            pic_elem = get_by_xpath_or_none(result, './/figure[@class="search-result__image"]/div/div[@class=" presence-entity__image EntityPhoto-circle-4 ember-view"]')
+            pic = pic_elem.get_attribute('style') if pic_elem is not None else None
+            if pic is not None:
+                pic = pic.replace('background-image: url("','')
+                pic = pic.replace('");','')
+
             name_elem = get_by_xpath_or_none(result, './/*[@class="name actor-name"]')
             name = name_elem.text if name_elem is not None else None
 
             title_elem = get_by_xpath_or_none(result, './/p')
             title = title_elem.text if name_elem is not None else None
 
-            user = LinkedinUser(name=name, title=title, company=company)
+            user = LinkedinUser(name=name, title=title, company=company, pic=pic, link=link)
 
             yield user
 
-            focus_elem_xpath = './/figure[@class="search-result__image"]/img'
+            focus_elem_xpath = './/figure[@class="search-result__image"]/div/div[@class=" presence-entity__image EntityPhoto-circle-4 ember-view"]'
             focus_elem = get_by_xpath_or_none(result, focus_elem_xpath, wait_timeout=1)
             if focus_elem is not None:
+                print(f'Photo img of {i}th user:{pic}')
                 driver.execute_script("arguments[0].scrollIntoView();", focus_elem)
         time.sleep(0.7)
 

@@ -6,7 +6,6 @@ from linkedin.spiders.selenium import SeleniumSpiderMixin
 
 NETWORK_URL = 'https://www.linkedin.com/mynetwork/invite-connect/connections/'
 
-
 class Linkedin(SeleniumSpiderMixin, CrawlSpider):
     name = "linkedin"
     start_urls = [
@@ -18,6 +17,3 @@ class Linkedin(SeleniumSpiderMixin, CrawlSpider):
         Rule(LinkExtractor(allow=('https:\/\/.*\/in\/.*',), deny=('https:\/\/.*\/in\/edit\/.*',)),
              ),
     )
-
-
-
